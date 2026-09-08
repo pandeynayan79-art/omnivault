@@ -112,7 +112,7 @@ export function MinimalMediaCard({ item, onClick }: MinimalMediaCardProps) {
             title={item.status}
           />
         </div>
-        {item.addedBy && (
+        {item.addedBy && item.addedBy !== 'Nayan Pandey' && item.addedBy !== 'OmniVault Curated' && item.addedBy !== 'Curated Demo' && (
           <p className="text-[10px] text-zinc-500 truncate">
             Added by <span className="text-zinc-400">{item.addedBy}</span>
           </p>

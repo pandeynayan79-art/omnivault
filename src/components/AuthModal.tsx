@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Lock, Mail, User as UserIcon, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { X, Lock, Mail, User as UserIcon, ArrowRight, ShieldCheck } from 'lucide-react';
 import { User } from '@/types';
 
 interface AuthModalProps {
@@ -53,12 +53,6 @@ export function AuthModal({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickFillOwner = () => {
-    setEmail('paneynayan79@gmail.com');
-    setPassword('11223344');
-    setError(null);
   };
 
   return (
@@ -176,19 +170,6 @@ export function AuthModal({
               />
             </div>
           </div>
-
-          {mode === 'login' && (
-            <div className="flex items-center justify-between text-[11px]">
-              <button
-                type="button"
-                onClick={handleQuickFillOwner}
-                className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 transition-colors"
-              >
-                <Sparkles className="w-3 h-3" />
-                Fill Owner Credentials
-              </button>
-            </div>
-          )}
 
           <button
             type="submit"
