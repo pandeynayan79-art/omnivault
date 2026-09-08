@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getNoteById, saveNote, deleteNote } from '@/lib/storage';
+import { getNoteById, saveNote, deleteNote, getSessionUser, canUserModifyNote } from '@/lib/storage';
 
 export async function GET(
   request: NextRequest,
@@ -10,6 +10,15 @@ export async function GET(
     if (!note) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });
     }
+
+    if (!note.isPublic) {
+      const token = request.cookies.get('omnivault_session')?.value;
+      const currentUser = token ? await getSessionUser(token) : null;
+      if (!canUserModifyNote(currentUser, note)) {
+        return NextResponse.json({ error: 'Unauthorized to view this private note' }, { status: 403 });
+      }
+    }
+
     return NextResponse.json({ note });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to get note' }, { status: 500 });
@@ -21,8 +30,19 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const note = await getNoteById(params.id);
+    if (!note) {
+      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
+    }
+
+    const token = request.cookies.get('omnivault_session')?.value;
+    const currentUser = token ? await getSessionUser(token) : null;
+    if (!canUserModifyNote(currentUser, note)) {
+      return NextResponse.json({ error: 'You do not have permission to modify this note' }, { status: 403 });
+    }
+
     const body = await request.json();
-    const updated = await saveNote({ ...body, id: params.id });
+    const updated = await saveNote({ ...body, id: params.id, userId: note.userId });
     return NextResponse.json({ note: updated });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to update note' }, { status: 500 });
@@ -34,6 +54,17 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const note = await getNoteById(params.id);
+    if (!note) {
+      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
+    }
+
+    const token = request.cookies.get('omnivault_session')?.value;
+    const currentUser = token ? await getSessionUser(token) : null;
+    if (!canUserModifyNote(currentUser, note)) {
+      return NextResponse.json({ error: 'You do not have permission to delete this note' }, { status: 403 });
+    }
+
     const success = await deleteNote(params.id);
     if (!success) {
       return NextResponse.json({ error: 'Note not found' }, { status: 404 });

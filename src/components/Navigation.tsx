@@ -15,7 +15,9 @@ import {
   Layers,
   Share2,
   LogIn,
-  LogOut
+  LogOut,
+  UserCheck,
+  Users
 } from 'lucide-react';
 import { User } from '@/types';
 
@@ -28,6 +30,8 @@ interface NavigationProps {
   onOpenSettings: () => void;
   publicFilter: 'all' | 'public_only' | 'private_only';
   setPublicFilter: (filter: 'all' | 'public_only' | 'private_only') => void;
+  scope: 'mine' | 'community';
+  setScope: (scope: 'mine' | 'community') => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   totalItemsCount: number;
@@ -44,6 +48,8 @@ export function Navigation({
   onOpenSettings,
   publicFilter,
   setPublicFilter,
+  scope,
+  setScope,
   searchQuery,
   setSearchQuery,
   totalItemsCount,
@@ -66,15 +72,52 @@ export function Navigation({
       {/* Top Header Bar */}
       <header className="sticky top-0 z-40 w-full bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-4 sm:px-8 py-3 transition-colors">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          {/* Logo */}
-          <div 
-            onClick={() => setActiveTab('all')}
-            className="flex items-center gap-2 cursor-pointer group flex-shrink-0"
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform" />
-            <span className="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-white transition-colors">
-              OmniVault
-            </span>
+          {/* Logo & Scope Selector */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div 
+              onClick={() => setActiveTab('all')}
+              className="flex items-center gap-2 cursor-pointer group flex-shrink-0"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform" />
+              <span className="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-white transition-colors">
+                OmniVault
+              </span>
+            </div>
+
+            {/* Scope Switcher: My Vault vs Community */}
+            {user ? (
+              <div className="hidden sm:flex items-center bg-zinc-900 p-0.5 rounded-lg border border-zinc-800 text-xs">
+                <button
+                  onClick={() => setScope('mine')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1.5 ${
+                    scope === 'mine'
+                      ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  title="View your personal private & public collection"
+                >
+                  <UserCheck className="w-3 h-3" />
+                  <span>My Vault</span>
+                </button>
+                <button
+                  onClick={() => setScope('community')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1.5 ${
+                    scope === 'community'
+                      ? 'bg-zinc-800 text-zinc-100 font-semibold'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  title="Explore public library and community recommendations"
+                >
+                  <Users className="w-3 h-3" />
+                  <span>Community</span>
+                </button>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-400">
+                <Users className="w-3 h-3 text-emerald-400" />
+                <span>Community Garden</span>
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation Links */}
@@ -211,6 +254,36 @@ export function Navigation({
             </button>
           </div>
         </div>
+
+        {/* Mobile Scope Switcher */}
+        {user && (
+          <div className="sm:hidden px-4 py-1.5 bg-zinc-900/40 border-t border-zinc-850 flex items-center justify-center">
+            <div className="flex items-center bg-zinc-900 p-0.5 rounded-lg border border-zinc-800 text-xs w-full max-w-xs">
+              <button
+                onClick={() => setScope('mine')}
+                className={`flex-1 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  scope === 'mine'
+                    ? 'bg-emerald-500/20 text-emerald-300 font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <UserCheck className="w-3 h-3" />
+                <span>My Vault</span>
+              </button>
+              <button
+                onClick={() => setScope('community')}
+                className={`flex-1 py-1 rounded-md text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                  scope === 'community'
+                    ? 'bg-zinc-800 text-zinc-100 font-semibold'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <Users className="w-3 h-3" />
+                <span>Community</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Mobile Bottom Bar */}

@@ -317,6 +317,41 @@ export async function getAllMedia(): Promise<MediaItem[]> {
   return db.media.sort((a, b) => new Date(b.dateLogged || b.createdAt).getTime() - new Date(a.dateLogged || a.createdAt).getTime());
 }
 
+export function isOwner(user: User | null): boolean {
+  if (!user) return false;
+  return user.role === 'owner' || user.email.toLowerCase() === 'paneynayan79@gmail.com' || user.id === 'u-owner';
+}
+
+export function canUserModifyMedia(user: User | null, item: MediaItem): boolean {
+  if (!user) return false;
+  if (isOwner(user)) return true;
+  return item.userId === user.id;
+}
+
+export function canUserModifyNote(user: User | null, note: AtomicNote): boolean {
+  if (!user) return false;
+  if (isOwner(user)) return true;
+  return note.userId === user.id;
+}
+
+export async function getMediaForUser(user: User | null, scope: 'mine' | 'community' = 'mine'): Promise<MediaItem[]> {
+  const all = await getAllMedia();
+
+  // If visitor (not logged in) or explicitly in community explore mode
+  if (!user || scope === 'community') {
+    return all.filter(item => item.isPublic);
+  }
+
+  // Personal vault view ('mine')
+  const owner = isOwner(user);
+  return all.filter(item => {
+    if (owner) {
+      return item.userId === user.id || item.userId === 'u-owner' || !item.userId;
+    }
+    return item.userId === user.id;
+  });
+}
+
 export async function getMediaById(id: string): Promise<MediaItem | undefined> {
   if (isSupabaseConfigured()) {
     try {
@@ -411,6 +446,22 @@ export async function getAllNotes(): Promise<AtomicNote[]> {
   }
   const db = ensureDataFile();
   return db.notes.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+}
+
+export async function getNotesForUser(user: User | null, scope: 'mine' | 'community' = 'mine'): Promise<AtomicNote[]> {
+  const all = await getAllNotes();
+
+  if (!user || scope === 'community') {
+    return all.filter(note => note.isPublic);
+  }
+
+  const owner = isOwner(user);
+  return all.filter(note => {
+    if (owner) {
+      return note.userId === user.id || note.userId === 'u-owner' || !note.userId;
+    }
+    return note.userId === user.id;
+  });
 }
 
 export async function getNoteById(id: string): Promise<AtomicNote | undefined> {

@@ -77,6 +77,8 @@ export interface Session {
 
 export interface AtomicNote {
   id: string;
+  userId?: string;
+  authorName?: string;
   title: string;
   content: string; // Markdown text
   tags: string[];

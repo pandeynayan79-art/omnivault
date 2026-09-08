@@ -95,6 +95,8 @@ function mapMediaToRow(item: Partial<MediaItem>): any {
 function mapRowToNote(row: any): AtomicNote {
   return {
     id: row.id,
+    userId: row.user_id || undefined,
+    authorName: row.author_name || undefined,
     title: row.title,
     content: row.content,
     tags: row.tags || [],
@@ -108,6 +110,8 @@ function mapRowToNote(row: any): AtomicNote {
 function mapNoteToRow(note: Partial<AtomicNote>): any {
   const row: any = {};
   if (note.id !== undefined) row.id = note.id;
+  if (note.userId !== undefined) row.user_id = note.userId;
+  if (note.authorName !== undefined) row.author_name = note.authorName;
   if (note.title !== undefined) row.title = note.title;
   if (note.content !== undefined) row.content = note.content;
   if (note.tags !== undefined) row.tags = note.tags;
